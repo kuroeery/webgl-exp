@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Awesome Experiment</title>
+  <title>Down the rabbit hole</title>
+  <link type="text/css" rel="stylesheet" href="./build/style.css"/>
   <style>
     body, html {
       width: 100%;
@@ -14,6 +15,42 @@
   </style>
 </head>
 <body>
+  <script id="vertexShader" type="x-shader/x-vertex">
+        void main() {
+            gl_Position = vec4( position, 1.0 );
+        }
+    </script>
+    <script id="fragmentShader" type="x-shader/x-fragment">
+        uniform vec2 u_resolution;
+        uniform float u_time;
+
+        void main() {
+            vec2 st = gl_FragCoord.xy/u_resolution.xy;
+            gl_FragColor=vec4(st.x,st.y,abs(sin(u_time)),1.0);
+        }
+    </script>
+    <script id="fs" type="x-shader/x-fragment">
+    // uniform sampler2D map;
+    uniform vec3 fogColor;
+    uniform float fogNear;
+    uniform float fogFar;
+    varying vec2 vUv;
+    void main() {
+        float depth = gl_FragCoord.z / gl_FragCoord.w;
+        float fogFactor = smoothstep( fogNear, fogFar, depth );
+        gl_FragColor = vec4(1.0,1.0,1.0,0.1);
+        gl_FragColor.w *= pow( gl_FragCoord.z, 20.0 );
+        gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
+    }
+</script>
+<script id="vs" type="x-shader/x-vertex">
+    varying vec2 vUv;
+    void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    }
+</script>
+
   <script src="./build/main.js"></script>
   <script src="./build/vendors/wagner/Wagner.js"></script>
   <script src="./build/vendors/wagner/Wagner.base.js"></script>
